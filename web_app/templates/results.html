@@ -7,29 +7,31 @@
     <tr>
         <td width="60%" valign="top">
 			<div class="wrapper">
-                Результат можно сохранить (правой кнопкой мыши "Cохранить картинку как...") или отправить на e-mail.<p/>
-				Для распознавания нового листа вернитесь на <a href="{{ url_for('index') }}">главную страницу</a>.
+                The results are given below.<p/>
+				To recognize a new sheet, return to the <a href="{{ url_for('index') }}">main page</a>.
 			</div>
-        </td>
-        <td width="40%" valign="top">
-            <div class="button_wrapper">
-                {{ form.submit(style="width:80%") }}
-                <p/>Отправить результат себе и/или сообщить разработчикам об ошибках распознавания, чтобы программа стала лучше.
-            </div>
         </td>
     </tr>
     {% for image_path, text, braille_text in image_paths_and_texts %}
     <tr>
-        <td width="60%" valign="top">
+        <td width="40%" valign="top">
+            <p>Braille Image</p>
             <img src="{{image_path}}" alt="Recognized image" style="width:100%; object-fit:contain" align="top">
         </td>
-        <td width="40%" valign="top">
+        <td width="30%" valign="top">
+            <p>Detected Braille Characters</p>
+            <div class="button_wrapper">
+                <textarea id="braille_text" cols="40" id="text" name="text" rows="30">{{ braille_text }}</textarea>
+			</div>
+            <button>Copy characters</button>
+			
+        </td>
+        <td width="30%" valign="top">
+            <p>Translated Braille Characters</p>
 			<div class="button_wrapper">
                 <textarea cols="40" id="text" name="text" rows="30">{{ text }}</textarea>
 			</div>
-			<div class="button_wrapper">
-                <textarea cols="40" id="text" name="text" rows="30">{{ braille_text }}</textarea>
-			</div>
+			
         </td>
     </tr>
     {% endfor %}

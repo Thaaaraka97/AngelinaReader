@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title> Angelina Braille Reader </title>
+    <title> Sinhala Braille Reader </title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='icon.png') }}">
     <!-- <link rel="stylessheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"> -->
     <style>
@@ -127,22 +127,12 @@
 <body>
     <div class="header_footer" style="padding-top:1%">
         {% if config['DEBUG'] %}
-            <div style="color: blue; text-align: center; font-size: 80%;">Angelina Braille Reader
+            <div style="color: blue; text-align: center; font-size: 80%;">Sinhala Braille Reader
             <span style="color: red; text-align: center; font-size: 180%;">(DEBUG)</span></div>
         {% else %}
-            <div style="color: blue; text-align: center; font-size: 180%;">Angelina Braille Reader</div>
+            <div style="color: blue; text-align: center; font-size: 180%;">Sinhala Braille Reader</div>
         {% endif %}
-    <div width="800" style="color: #fff; background-color: #08730d; text-align: center; font-size: 180%;">
-        Запущена новая версия сайта!<p/>
-    </div>
-    <div width="800" style="color: #fff; background-color: #08730d; text-align: center;">
-        (потребуется повторная регистрация)<p/>
-        Присылайте отзывы и замечания на <a href="mailto:angelina-reader@ovdv.ru" style="white-space: nowrap">angelina-reader@ovdv.ru</a>
-    </div>
-    <div width="800" style="text-align: center; font-size: 250%;">
-        <a href="https://angelina-reader.com">ПЕРЕЙТИ</a><p/>
-    </div>
-        <table width="100%">
+        <!-- <table width="100%">
         <tr>
         <td valign="top">
         <a href="{{ url_for('index') }}" class="menu_item"> Главная </a>
@@ -157,7 +147,7 @@
         {% endif %}
         </td>
         </tr>
-        </table>
+        </table> -->
     </div>
 
     {% block content %} {% endblock %}
@@ -165,7 +155,7 @@
     <div class="wrapper">
         <br/><br/><br/>
     </div>
-    <div class="header_footer" style="text-align: center; position:fixed; bottom:0px; padding:1% 2% 1% 2%">
+    <!-- <div class="header_footer" style="text-align: center; position:fixed; bottom:0px; padding:1% 2% 1% 2%">
         <table width="100%" valign="center">
         <tr>
             <td width="50%" valign="center" align="center">
@@ -179,6 +169,6 @@
             </td>
         </tr>
         </table>
-    </div>
+    </div> -->
 </body>
 </html>

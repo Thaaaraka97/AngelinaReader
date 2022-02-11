@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 """
-web application Angelina Braille reader
+web application Sinhala Braille reader
 """
 from flask import Flask, render_template, redirect, request, url_for, flash
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
@@ -68,13 +68,13 @@ def index(template, is_mobile=False):
     class MainForm(FlaskForm):
         camera_file = FileField()
         file = FileField()
-        agree = BooleanField("Я согласен")
-        disgree = BooleanField("Возражаю")
-        lang = SelectField("Язык текста", choices=[('RU', 'Русский'), ('EN', 'English'), ('GR', 'Ελληνικά'), ('LV', 'Latviešu'),
+        agree = BooleanField("Agree")
+        disgree = BooleanField("Disagree")
+        lang = SelectField("Language", choices=[('RU', 'Русский'), ('EN', 'English'), ('GR', 'Ελληνικά'), ('LV', 'Latviešu'),
                                                    ('PL', 'Polski'), ('UZ', 'Ўзбек'), ('UZL', "O'zbekcha")])
-        find_orientation = BooleanField("Авто-ориентация")
-        process_2_sides = BooleanField("Обе стороны")
-    form = MainForm(agree=request.values.get('has_public_confirm', '') == 'True',
+        find_orientation = BooleanField("Auto-orientation")
+        process_2_sides = BooleanField("Both sides")
+    form = MainForm(agree=request.values.get('has_public_confirm', 'True') == 'True',
                     disgree=request.values.get('has_public_confirm', '') == 'False',
                     lang=request.values.get('lang', 'RU'),
                     find_orientation=request.values.get('find_orientation', 'True') == 'True',
@@ -148,7 +148,7 @@ def confirm(template):
 def results(template):
     class ResultsForm(FlaskForm):
         results_list = HiddenField()
-        submit = SubmitField('отправить на e-mail')
+        submit = SubmitField('send to e-mail')
     form = ResultsForm()
     if form.validate_on_submit():
         return redirect(url_for('email',
@@ -164,7 +164,7 @@ def results(template):
         results_list = core.get_results(task_id)
     if results_list is None:
         flash(
-            'Ошибка обработки файла. Возможно, файл имеет неверный формат. Если вы считаете, что это ошибка, пришлите файл по адресу, указанному в низу страцины')
+            'File processing error. The file might be in the wrong format. If you think this is a mistake, please send the file to the address at the bottom of the page.')
         return redirect(url_for('index',
                                 has_public_confirm=request.values['has_public_confirm'],
                                 lang=request.values['lang'],
@@ -174,10 +174,10 @@ def results(template):
     image_paths_and_texts = list()
     file_names = list()
     for marked_image_path, recognized_text_path, recognized_braille_path in results_list["item_data"]:
-        # полный путь к картинке -> "/static/..."
-        # даннные для отображения в форме
+        # full path to image -> "/static/..."
+        # data to display in the form
 
-        # GVNC для совместимости с V2: "/static/..." -> имя картинки
+        # GVNC for Compatibility с V2: "/static/..." -> picture name
         marked_image_path = marked_image_path[1:]
         marked_image_path = str(Path(marked_image_path).relative_to(app.config['DATA_ROOT']))
         recognized_text_path = str(Path(recognized_text_path).relative_to(data_root_path))
@@ -189,7 +189,7 @@ def results(template):
             out_braille = ''.join(f.readlines())
         image_paths_and_texts.append(("/" + app.config['DATA_ROOT'] + "/" + marked_image_path, out_text, out_braille,))
 
-        # список c полными путями для передачи в форму почты
+        # list with full paths to send to mail form
         file_names.append((str(data_root_path / marked_image_path), str(data_root_path / recognized_text_path)))  # список для
 
     form = ResultsForm(results_list=json.dumps(file_names))
@@ -302,7 +302,8 @@ def run():
     args = parser.parse_args()
     debug = args.debug
     if not debug:
-        startup_logger()
+        # startup_logger()
+        print("not debug")
     if debug:
         print('running in DEBUG mode!')
     else:
