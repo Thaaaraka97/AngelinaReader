@@ -44,7 +44,7 @@ def create_model_retinanet(params, device):
         if params.data.get_points:
             labels = [torch.tensor([0]*len(lb), dtype = torch.long, device=device) for lb in labels]
         elif use_multiple_class_groups:
-            # классы нумеруются с 0, отсутствие класса = -1, далее в encode cls_targets=1+labels
+            # classes are numbered from 0, no class = -1, then в encode cls_targets=1+labels
             labels = [torch.tensor([[int(ch)-1 for ch in label_tools.int_to_label010(int_lbl.item())] for int_lbl in lb],
                                    dtype=torch.long, device=device) for lb in labels]
 

@@ -16,7 +16,7 @@ def validate_int(int_label):
     Raise exception otherwise
     '''
     assert isinstance(int_label, int)
-    assert int_label >= 0 and int_label < 64, "Ошибочная метка: " + str(int_label)
+    assert int_label >= 0 and int_label < 64, "Wrong label: " + str(int_label)
 
 def label010_to_int(label010):
     '''
@@ -69,9 +69,9 @@ def label123_to_int(label123):
 # acceptable strings for manual labeling -> output chars in letters.py (acceptable synonyms)
 labeling_synonyms = {
     "xx": "XX",
-    "хх": "XX",  # russian х on the left
+    "хх": "XX",  # ru х on the left
     "cc": "CC",
-    "сс": "CC",  # russian с on the left
+    "сс": "CC",  # ru с on the left
     "<<": "«",
     ">>": "»",
     "((": "()",
@@ -125,7 +125,7 @@ for d in letters.letter_dicts.values():
 
 # global list of 64 bools indicating what labels are valid in most common language dicts
 label_is_valid = [
-    True if (int_to_letter(int_label, ['SYM','RU', 'EN', 'NUM']) is not None) else False
+    True if (int_to_letter(int_label, ['SYM','RU', 'NUM']) is not None) else False
     for int_label in range(64)
 ]
 
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     assert int_to_label010(human_label_to_int('1')) == '100000'
     assert int_to_label010(human_label_to_int('CC')) == '000110'
     assert int_to_label010(human_label_to_int('xx')) == '111111'
-    assert int_to_label010(human_label_to_int('Хх')) == '111111'  # русский
+    assert int_to_label010(human_label_to_int('Хх')) == '111111'
     assert int_to_label010(human_label_to_int('##')) == '001111'
     assert int_to_label010(human_label_to_int('а')) == '100000'
     assert int_to_label010(human_label_to_int('Б')) == '110000'

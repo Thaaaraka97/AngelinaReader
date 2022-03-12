@@ -2,12 +2,12 @@ import sys
 import subprocess
 import time
 
-import angelina_reader_core
+import reader_core
 
 processes = 50
 iters = 100
 
-core = angelina_reader_core.AngelinaSolver()
+core = reader_core.AngelinaSolver()
 
 param = sys.argv[1]
 

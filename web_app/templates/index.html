@@ -19,28 +19,27 @@ function set_onchange() {
     <div class="wrapper">
         <br/>
 		Braille text recognition in an image.<br/>
-		For recognition, upload a photo of the text  (<a href="{{ url_for('help') }}">how to take a photo</a>)
     </div>
     {% if current_user.is_anonymous  %}
         <div class="wrapper" style="padding-top: 20px">
-            Для работы необходимо <a href="{{ url_for('login') }}"> войти </a> / <a href="{{ url_for('register') }}"> зарегистрироваться </a>
+            Required to work <a href="{{ url_for('login') }}"> Login </a> / <a href="{{ url_for('register') }}"> register </a>
         </div>
     {% else %}
         <div id="normal_mode">
             <div class="wrapper">
-                If you agree that this image be used in a publicly published dataset for the development of new braille recognition algorithms, please check it below. You can recognize text without giving consent. In this case, the uploaded image will not be included in the publicly available dataset.
+                Please Click on the button and upload a image files that consists of braille texts. The supported file types that can be uploaded into the system are *.jpg, *.jpeg, *.png.
             </div>
             <div>
-                <table class="centered" width="100%"><tr>
+                <table class="centered hidden" width="100%"><tr>
                     <td>{{ form.agree() }} <label for="agree">{{ form.agree.label }}</label></td>
                     <td>{{ form.disgree() }} <label for="disgree">{{ form.disgree.label }}</label></td>
                 </tr></table>
             </div>
-            <div class="wrapper">
+            <div class="wrapper hidden">
                 Settings:
             </div>
             <div>
-                <table class="centered" width="100%"><tr>
+                <table class="centered hidden" width="100%"><tr>
                     <td>{{ form.lang }} <label for="lang">{{ form.lang.label }}</label></td>
                     <td>{{ form.find_orientation() }} <label for="find_orientation">{{ form.find_orientation.label }}</label></td>
                     <td>{{ form.process_2_sides() }} <label for="process_2_sides">{{ form.process_2_sides.label }}</label></td>
@@ -50,7 +49,6 @@ function set_onchange() {
             <div class="button_wrapper">
                 <input type="button" id="form_file_click" value="Upload Image" onclick="set_onchange(); form.file.click();"/>
                 <div align="center">
-                    (image, pdf, zip)
                 </div>
             </div>
             {{ form.camera_file(accept="image/*", capture="camera", style="display:none;") }}

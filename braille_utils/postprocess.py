@@ -26,8 +26,8 @@ class LineChar:
 class Line:
     STEP_TO_W = 1.25
     LINE_THR = 0.6
-    AVG_PERIOD = 5 # для аппроксимации при коррекции
-    AVG_APPROX_DIST = 3 # берутся точки с интервалос не менее 2, т.е. 0я и 3я или 1я и 4я
+    AVG_PERIOD = 5 # for approximation when correcting
+    AVG_APPROX_DIST = 3 # points are taken with intervals of at least 2, i.e. 0th and 3rd or 1st and 4th
 
     def __init__(self, box, label):
         self.chars = []
@@ -268,12 +268,6 @@ def interpret_line_RU(line, lang, mode = None):
 
 interpret_line_funcs = {
     'RU': interpret_line_RU,
-    'EN': interpret_line_RU, # TODO in can work with some errors for EN
-    'GR': interpret_line_RU,
-    'LV': interpret_line_RU,
-    'PL': interpret_line_RU,
-    'UZ': interpret_line_RU,
-    'UZL': interpret_line_RU,
 }
 
 

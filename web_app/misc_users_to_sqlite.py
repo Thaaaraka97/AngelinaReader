@@ -2,7 +2,7 @@ import json
 from pathlib import Path
 import sqlite3
 
-import angelina_reader_core
+import reader_core
 
 json_file = "static/data/all_users.json"
 db_file = Path(json_file).with_suffix(".db")

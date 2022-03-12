@@ -11,41 +11,14 @@ from wtforms.validators import DataRequired
 from flask_mobility import Mobility
 from flask_mobility.decorators import mobile_template
 
-import atexit
-from email.mime.text import MIMEText
 import time
 import json
-import signal
-import sys
 import argparse
 from pathlib import Path
-import socket
 
 from .config import Config
-from .reader_core import AngelinaSolver, VALID_EXTENTIONS, fill_message_headers, send_email
+from .reader_core import AngelinaSolver, VALID_EXTENTIONS
 
-
-def startup_logger():
-    hostname = socket.gethostname()
-    def send_startup_email(what):
-        """
-        """
-        # create message object instance
-        txt = 'Angelina Reader is {} at {}'.format(what, hostname)
-        msg = fill_message_headers(MIMEText(txt, _charset="utf-8"), 'Angelina Reader<angelina-reader@ovdv.ru>', txt)
-        send_email(msg)
-
-    send_startup_email('started')
-
-    atexit.register(send_startup_email, 'stopped')
-    def signal_handler(sig, frame):
-        send_startup_email('interrupted by caught {}'.format(sig))
-        sys.exit(0)
-    for s in set(signal.Signals):
-        try:
-            signal.signal(s, signal_handler)
-        except:
-            print('failed to set handler for signal {}'.format(s))
 
 app = Flask(__name__)
 Mobility(app)
@@ -70,8 +43,7 @@ def index(template, is_mobile=False):
         file = FileField()
         agree = BooleanField("Agree")
         disgree = BooleanField("Disagree")
-        lang = SelectField("Language", choices=[('RU', 'Русский'), ('EN', 'English'), ('GR', 'Ελληνικά'), ('LV', 'Latviešu'),
-                                                   ('PL', 'Polski'), ('UZ', 'Ўзбек'), ('UZL', "O'zbekcha")])
+        lang = SelectField("Language", choices=[('RU', 'Sinahala')])
         find_orientation = BooleanField("Auto-orientation")
         process_2_sides = BooleanField("Both sides")
     form = MainForm(agree=request.values.get('has_public_confirm', 'True') == 'True',
@@ -83,15 +55,15 @@ def index(template, is_mobile=False):
     if form.validate_on_submit():
         file_data = form.camera_file.data or form.file.data
         if not file_data:
-            flash('Необходимо загрузить файл')
+            flash('Need to upload a file')
             return render_template(template, form=form)
         if form.agree.data and form.disgree.data or not form.agree.data and not form.disgree.data:
-            flash('Выберите один из двух вариантов (согласен/возражаю)')
+            flash('Choose one of the two options (agree / disagree)')
             return render_template(template, form=form)
         filename = file_data.filename
         file_ext = Path(filename).suffix[1:].lower()
         if file_ext not in VALID_EXTENTIONS:
-            flash('Не подхожящий тип файла {}: {}'.format(file_ext, filename))
+            flash('Invalid file type {}: {}'.format(file_ext, filename))
             return render_template(template, form=form)
 
         user_id = current_user.get_id()
@@ -124,13 +96,13 @@ def index(template, is_mobile=False):
 @mobile_template('{m/}confirm.html')
 def confirm(template):
     class Form(FlaskForm):
-        agree = BooleanField("Я согласен на публикацию.")
-        disgree = BooleanField("Возражаю. Это приватный текст.", default=True)
-        submit = SubmitField('Распознать')
+        agree = BooleanField("I agree to the publication.")
+        disgree = BooleanField("I object. This is private text.", default=True)
+        submit = SubmitField('recognize')
     form = Form()
     if form.validate_on_submit():
         if form.agree.data and form.disgree.data or not form.agree.data and not form.disgree.data:
-            flash('Выберите один из двух вариантов (согласен/возражаю)')
+            flash('Choose one of the two options (agree / disagree)')
             return render_template(template, form=form)
         has_public_confirm = form.agree.data
         return redirect(url_for('results',
@@ -148,10 +120,9 @@ def confirm(template):
 def results(template):
     class ResultsForm(FlaskForm):
         results_list = HiddenField()
-        submit = SubmitField('send to e-mail')
     form = ResultsForm()
     if form.validate_on_submit():
-        return redirect(url_for('email',
+        return redirect(url_for('',
                                 task_id=request.values['task_id'],
                                 has_public_confirm=request.values['has_public_confirm'],
                                 lang=request.values['lang'],
@@ -179,7 +150,13 @@ def results(template):
 
         # GVNC for Compatibility с V2: "/static/..." -> picture name
         marked_image_path = marked_image_path[1:]
+        # marked_image_path = str(Path(marked_image_path).relative_to(app.config['DATA_ROOT']))
+        # changes_presentation
         marked_image_path = str(Path(marked_image_path).relative_to(app.config['DATA_ROOT']))
+        marked_image_path = marked_image_path.replace("marked", "labeled")
+        print(marked_image_path)
+        # print("Hi")
+        
         recognized_text_path = str(Path(recognized_text_path).relative_to(data_root_path))
         recognized_braille_path = str(Path(recognized_braille_path).relative_to(data_root_path))
 
@@ -195,108 +172,19 @@ def results(template):
     form = ResultsForm(results_list=json.dumps(file_names))
     return render_template(template, form=form, image_paths_and_texts=image_paths_and_texts)
 
-@app.route("/email", methods=['GET', 'POST'])
-@login_required
-@mobile_template('{m/}email.html')
-def email(template):
-    class Form(FlaskForm):
-        e_mail = StringField('E-mail', validators=[DataRequired()])
-        to_developers = BooleanField('Отправить разработчикам')
-        title = StringField('Заголовок письма')
-        comment = TextAreaField('Комментарий')
-        as_attachment = BooleanField("отправить как вложение")
-        send_braille = BooleanField("Брайль", default=True)
-        send_text = BooleanField("текст", default=True)
-        send_image = BooleanField("изображение", default=True)
-        submit = SubmitField('Отправить')
-    form = Form()
-    if form.validate_on_submit():
-        core.send_results_to_mail(mail=form.e_mail.data, task_id=request.values['task_id'],
-                                  parameters={'subject': form.title.data,
-                                              'to_developers': form.to_developers.data,
-                                              'comment': form.comment.data,
-                                              'send_braille': form.send_braille.data,
-                                              'send_text': form.send_text.data,
-                                              'send_image': form.send_image.data,
-                                              })
-        return redirect(url_for('index',
-                                has_public_confirm=request.values['has_public_confirm'],
-                                lang=request.values['lang'],
-                                find_orientation=request.values['find_orientation'],
-                                process_2_sides=request.values['process_2_sides']))
-    form = Form(e_mail=current_user.email)
-    return render_template(template, form=form)
-
-
-
-@app.route("/help")
-def help():
-    return render_template('help.html')
-
-
 @app.route("/results_demo")
 @mobile_template('{m/}results_demo.html')
 def results_demo(template):
     time.sleep(1)
     return render_template(template)
 
-
-@app.route('/login', methods=['GET', 'POST'])
-@mobile_template('{m/}login.html')
-def login(template):
-    class LoginForm(FlaskForm):
-        e_mail = StringField('E-mail', validators=[DataRequired()])
-        remember_me = BooleanField('Запомнить меня')
-        submit = SubmitField('Войти')
-
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = core.find_user(email=form.e_mail.data)  # TODO by network
-        if user is None:
-            flash('Пользователь не найден. Если вы - новый пользователь, зарегистрируйтесь')
-            return redirect(url_for('register'))
-        #if user is None or not user.check_password(form.password.data):
-        #    return redirect(url_for('login'))
-        login_user(user, remember=form.remember_me.data)
-        return redirect(url_for('index'))
-    return render_template(template, title='Sign In', form=form)
-
-
-@app.route('/register', methods=['GET', 'POST'])
-@mobile_template('{m/}register.html')
-def register(template):
-    class RegisterForm(FlaskForm):
-        e_mail = StringField('E-mail', validators=[DataRequired()])
-        username = StringField('Имя, фамилия', validators=[DataRequired()])
-        remember_me = BooleanField('Запомнить меня')
-        submit = SubmitField('Зарегистрироваться и войти')
-
-    form = RegisterForm()
-    if form.validate_on_submit():
-        found_users = core.find_users_by_email(email=form.e_mail.data)
-        if len(found_users):
-            flash('Пользователь с таким E-mail уже существует')
-            return redirect(url_for('register'))
-        user = core.register_user(name=form.username.data, email=form.e_mail.data, password="", network_name=None, network_id=None)  # TODO only email registration now
-        login_user(user, remember=form.remember_me.data)
-        return redirect(url_for('index'))
-    return render_template(template, title='Sign In', form=form)
-
-
 @app.route('/logout')
 def logout():
     logout_user()
     return redirect(url_for('index'))
 
-
-@app.route("/donate", methods=['GET', 'POST'])
-@mobile_template('{m/}donate.html')
-def donate(template):
-    return render_template(template)
-
-
 def run():
-    parser = argparse.ArgumentParser(description='Angelina Braille reader web app.')
+    parser = argparse.ArgumentParser(description='Sinhala Braille reader web app.')
     parser.add_argument('--debug', dest='debug', action='store_true',
                         help='enable debug mode (default: off)')
     args = parser.parse_args()
@@ -311,9 +199,9 @@ def run():
     app.jinja_env.cache = {}
     if debug:
         app.config['TEMPLATES_AUTO_RELOAD'] = True
-        app.run(debug=True, host='0.0.0.0', port=5001)
+        app.run(debug=True, host='127.0.0.1', port=5001)
     else:
-        app.run(host='0.0.0.0', threaded=True)
+        app.run(host='127.0.0.1', threaded=True)
 
 if __name__ == "__main__":
     run()

@@ -26,12 +26,10 @@ sym_map = {
     '3456': num_sign,
     '123456': markout_sign,
     '23': sin_nm_sign, #sagngnaka sign
-    # '6': "en",
-    # '46': "EN",  # TODO only for Russian ?
 }
 
-# RU symbols
-alpha_map_RU = {
+# Sinahala symbols
+alpha_map_SIN = {
     '1'  : 'අ',
     '345' : 'ආ',
     '12356':'ඇ',
@@ -85,59 +83,8 @@ alpha_map_RU = {
     '4' : '|',
     '23' : 'nm',
 
-    # '45': caps_sign,
-    # '236': '«',  # <<
-    # '356': '»',  # >>
-    # '4': "'",
-    # '456': "|",
-    # '346': '§',  # mark as &&
 }
 
-# UZ symbols
-alpha_map_UZ = {
-    **alpha_map_RU,
-    # '1236': 'ў',
-    # '13456': 'қ',
-    # '12456': 'ғ',
-    # '1456': 'ҳ',
-}
-
-# EN symbols
-alpha_map_EN = {
-    # '1': 'a',
-    # '12': 'b',
-    # '14': 'c',
-    # '145': 'd',
-    # '15': 'e',
-    # '124': 'f',
-    # '1245': 'g',
-    # '125': 'h',
-    # '24': 'i',
-    # '245': 'j',
-    # '13': 'k',
-    # '123': 'l',
-    # '134': 'm',
-    # '1345': 'n',
-    # '135': 'o',
-    # '1234': 'p',
-    # '12345': 'q',
-    # '1235': 'r',
-    # '234': 's',
-    # '2345': 't',
-    # '136': 'u',
-    # '1236': 'v',
-    # '2456': 'w',
-    # '1346': 'x',
-    # '13456': 'y',
-    # '1356': 'z',
-
-    # #'6': caps_sign, # TODO duplicate оf RU caps_sign
-    # '3': "'",
-    # '236': '«',  # <<
-    # '356': '»',  # >>
-    # # '236': '"',  # mark as <<
-    # # '356': '"',  # mark as >>
-}
 
 # Digit symbols (after num_sign)
 num_map = {
@@ -168,7 +115,7 @@ num_denominator_map = {
 }
 
 # Symbols for Math Braille (in Russian braille, I suppose)
-math_RU = {
+math = {
     '2': ',',  # decimal separator
     '3': '..',  # postprocess to "." (thousand separator) if between digits else to * (multiplication).
     '235': '+',
@@ -192,11 +139,9 @@ math_RU = {
 # Codes for dicts
 letter_dicts = {
     'SYM': sym_map,
-    'RU': alpha_map_RU,
-    'EN': alpha_map_EN,
-    'UZ': alpha_map_UZ,
+    'RU': alpha_map_SIN,
     'NUM': num_map,
     'NUM_DENOMINATOR': num_denominator_map,
-    'MATH_RU': math_RU,
+    'MATH_RU': math,
 }
 

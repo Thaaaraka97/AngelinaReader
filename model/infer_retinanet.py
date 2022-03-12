@@ -39,8 +39,8 @@ device = 'cuda:0'
 #device = 'cpu'
 cls_thresh = 0.3
 nms_thresh = 0.02
-REFINE_COEFFS = [0.083, 0.092, -0.083, -0.013]  # Коэффициенты (в единицах h символа) для эмпирической коррекции
-                        # получившихся размеров, чтобы исправить неточность результатов для последующей разметки
+REFINE_COEFFS = [0.083, 0.092, -0.083, -0.013]  # Coefficients (in units of h symbol) for empirical correction
+                        # the resulting dimensions to correct the inaccuracy of the results for subsequent markup
 
 class OrientationAttempts(enum.IntEnum):
     NONE = 0
@@ -77,7 +77,6 @@ class BraileInferenceImpl(torch.nn.Module):
         self.num_classes = [] if not params.data.get('class_as_6pt', False) else [1]*6
 
     def calc_letter_statistics(self, cls_preds, cls_thresh, orientation_attempts):
-        # type: (List[Tensor], float)->Tuple[int, Tuple[Tensor, Tensor, Tensor]]
         device = cls_preds[min(orientation_attempts)].device
         stats = [torch.zeros((1, 64,), device=device)]*8
         for i, cls_pred in enumerate(cls_preds):
@@ -96,7 +95,6 @@ class BraileInferenceImpl(torch.nn.Module):
         return best_idx.item(), (err_score, sum_valid, sum_invalid)
 
     def forward(self, input_tensor, input_tensor_rotated, find_orientation, process_2_sides):
-        # type: (Tensor, Tensor, int)->Tuple[Tensor,Tensor,Tensor,int, Tuple[Tensor, Tensor, Tensor]]
         t = timeit.default_timer()
         orientation_attempts = [OrientationAttempts.NONE]
         if find_orientation:
@@ -210,53 +208,47 @@ class BrailleInference:
                     print("Model pth loaded")
         self.impl.to(device)
 
-    def load_pdf(self, img_fn):
+    def load_img(self, img_fn):
         try:
-            pdf_file = fitz.open(img_fn)
-            pg = pdf_file.loadPage(0)
-            pdf = pg.getPixmap()
-            cspace = pdf.colorspace
+            img_file = fitz.open(img_fn)
+            pg = img_file.loadPage(0)
+            img = pg.getPixmap()
+            cspace = img.colorspace
             if cspace is None:
                 mode = "L"
             elif cspace.n == 1:
-                mode = "L" if pdf.alpha == 0 else "LA"
+                mode = "L" if img.alpha == 0 else "LA"
             elif cspace.n == 3:
-                mode = "RGB" if pdf.alpha == 0 else "RGBA"
+                mode = "RGB" if img.alpha == 0 else "RGBA"
             else:
                 mode = "CMYK"
-            img = PIL.Image.frombytes(mode, (pdf.width, pdf.height), pdf.samples)
+            img = PIL.Image.frombytes(mode, (img.width, img.height), img.samples)
             return img
         except Exception as exc:
             return None
 
 
     def run(self, img, lang, draw_refined, find_orientation, process_2_sides, align_results, repeat_on_aligned=True, gt_rects=[]):
-        """
-        :param img: can be 1) PIL.Image 2) filename to image (.jpg etc.) or .pdf file
-        """
+
         if gt_rects:
-            assert find_orientation == False, "gt_rects можно передавать только если ориентация задана"
+            assert find_orientation == False, "gt_rects can only be passed if the orientation is set"
         t = timeit.default_timer()
         if not isinstance(img, PIL.Image.Image):
             try:
                 if Path(img).suffix=='.pdf':
-                    img = self.load_pdf(img)
+                    img = self.load_img(img)
                 else:
                     img = PIL.Image.open(img)
             except Exception as e:
                 return None
         if self.verbose >= 2:
             print("run.reading image", timeit.default_timer() - t)
-            # img.save(Path(results_dir) / 'original.jpg')
-            # img.save(Path(results_dir) / 'original_100.jpg', quality=100)
             t = timeit.default_timer()
         if repeat_on_aligned and not process_2_sides:
             results_dict0 = self.run_impl(img, lang, draw_refined, find_orientation,
                                           process_2_sides=False, align=True, draw=False, gt_rects=gt_rects)
             if self.verbose >= 2:
                 print("run.run_impl_1", timeit.default_timer() - t)
-                # results_dict0['image'].save(Path(results_dir) / 're1.jpg')
-                # results_dict0['image'].save(Path(results_dir) / 're1_100.jpg', quality=100)
                 t = timeit.default_timer()
             results_dict = self.run_impl(results_dict0['image'], lang, draw_refined, find_orientation=False,
                                          process_2_sides=process_2_sides, align=False, draw=True,
@@ -268,26 +260,12 @@ class BrailleInference:
             results_dict = self.run_impl(img, lang, draw_refined, find_orientation,
                                          process_2_sides=process_2_sides, align=align_results, draw=True, gt_rects=gt_rects)
         if self.verbose >= 2:
-            # results_dict['image'].save(Path(results_dir) / 're2.jpg')
-            # results_dict['image'].save(Path(results_dir) / 're2_100.jpg', quality=100)
             print("run.run_impl", timeit.default_timer() - t)
         return results_dict
-
-
-    # def refine_boxes(self, boxes):
-    #     """
-    #     GVNC. Эмпирическая коррекция получившихся размеров чтобы исправить неточность результатов для последующей разметки
-    #     :param boxes:
-    #     :return:
-    #     """
-    #     h = boxes[:, 3:4] - boxes[:, 1:2]
-    #     coefs = torch.tensor([REFINE_COEFFS])
-    #     deltas = h * coefs
-    #     return boxes + deltas
 		
     def refine_lines(self, lines):
         """
-        GVNC. Эмпирическая коррекция получившихся размеров чтобы исправить неточность результатов для последующей разметки
+        GVNC. Empirical correction of the resulting dimensions to correct the inaccuracy of the results for subsequent markup
         :param boxes:
         :return:
         """
@@ -324,7 +302,6 @@ class BrailleInference:
             print("    run_impl.impl", timeit.default_timer() - t)
             t = timeit.default_timer()
 
-        #boxes = self.refine_boxes(boxes)
         boxes = boxes.tolist()
         labels = labels.tolist()
         scores = scores.tolist()
@@ -332,7 +309,6 @@ class BrailleInference:
         self.refine_lines(lines)
 
         if process_2_sides:
-            #boxes2 = self.refine_boxes(boxes2)
             boxes2 = boxes2.tolist()
             labels2 = labels2.tolist()
             scores2 = scores2.tolist()
@@ -345,8 +321,6 @@ class BrailleInference:
 
         if self.verbose >= 2:
             print("    run_impl.postprocess", timeit.default_timer() - t)
-            # aug_img.save(Path(results_dir) / 'aug_{}.jpg'.format(align))
-            # aug_img.save(Path(results_dir) / 'aug_{}_100.jpg'.format(align), quality = 100)
             t = timeit.default_timer()
 
         if align and not process_2_sides:
@@ -359,8 +333,6 @@ class BrailleInference:
                 aug_gt_rects = postprocess.transform_rects(aug_gt_rects, hom)
             if self.verbose >= 2:
                 print("    run_impl.align", timeit.default_timer() - t)
-                # aug_img.save(Path(results_dir) / 'aligned_{}.jpg'.format(align))
-                # aug_img.save(Path(results_dir) / 'aligned_{}_100.jpg'.format(align), quality = 100)
                 t = timeit.default_timer()
         else:
             hom = None
@@ -416,9 +388,6 @@ class BrailleInference:
                     draw.text((ch_box[0], ch_box[3]), ch.char, font=fntErr, fill="black")
                 else:
                     draw.text((ch_box[0]+5,ch_box[3]-7), ch.char, font=fntA, fill="black")
-                #score = scores[i].item()
-                #score = '{:.1f}'.format(score*10)
-                #draw.text((box[0],box[3]+12), score, font=fnt, fill='green')
             out_text.append(s)
             out_braille.append(s_brl)
         return {
@@ -626,4 +595,3 @@ if __name__ == '__main__':
                                     align_results=True,
                                     repeat_on_aligned=repeat_on_aligned)
 
-    #recognizer.process_dir_and_save(r'D:\Programming.Data\Braille\My\raw\ang_redmi\*.jpg', r'D:\Programming.Data\Braille\tmp\flip_inv\ang_redmi', lang = 'RU')

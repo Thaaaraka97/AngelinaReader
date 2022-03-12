@@ -18,18 +18,20 @@
             <p>Braille Image</p>
             <img src="{{image_path}}" alt="Recognized image" style="width:100%; object-fit:contain" align="top">
         </td>
-        <td width="30%" valign="top">
-            <p>Detected Braille Characters</p>
-            <div class="button_wrapper">
-                <textarea id="braille_text" cols="40" id="text" name="text" rows="30">{{ braille_text }}</textarea>
-			</div>
-            <button>Copy characters</button>
-			
-        </td>
+        <div class="ml-5">
+            <td width="30%" valign="top">
+                <p>Detected Braille Characters</p>
+                <div class="button_wrapper">
+                    <textarea id="braille_text" cols="50" id="text" name="text" rows="30">{{ braille_text }}</textarea>
+                </div>
+                <button>Copy characters</button>
+                
+            </td>
+        </div>
         <td width="30%" valign="top">
             <p>Translated Braille Characters</p>
 			<div class="button_wrapper">
-                <textarea cols="40" id="text" name="text" rows="30">{{ text }}</textarea>
+                <textarea cols="50" id="text" name="text" rows="30">{{ text }}</textarea>
 			</div>
 			
         </td>

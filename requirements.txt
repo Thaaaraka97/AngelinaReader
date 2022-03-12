@@ -1,7 +1,7 @@
 --find-links https://download.pytorch.org/whl/torch_stable.html
 numpy>=1.15.1
 pillow>=6.2.0
-torch==1.6.0
+torch==1.7.0
 torchvision==0.7.0
 werkzeug==0.14.1
 flask==0.12
