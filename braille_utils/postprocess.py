@@ -176,7 +176,7 @@ def interpret_line_RU(line, lang, mode = None):
                                 prev_ch.char = ''
                                 ch.char = '%'
                             else:
-                                ch.labeling_char = ch.char = None #frac_mode = True # TOOD вернуться к отображению дробей
+                                ch.labeling_char = ch.char = None #frac_mode = True 
                 else:
                     ch.labeling_char = ch.char = lt.int_to_letter(ch.label, ['NUM_DENOMINATOR'])
                     if ch.char is not None:
@@ -206,8 +206,8 @@ def interpret_line_RU(line, lang, mode = None):
             if math_mode and ch.char is None:
                 frac_mode = False
                 if not math_lang and (ch.spaces_before or lt.int_to_letter(ch.label, ['MATH_RU']) == '..'):
-                    # без spaces_before точка и запятая после числа интерпретируется как математический знак :
-                    # перед умножением точкой (..) пробел не ставится
+                    # without spaces_before dot and comma after number is interpreted as mathematical sign :
+                    # dot (..) is not preceded by a space
                     ch.labeling_char = ch.char = lt.int_to_letter(ch.label, ['MATH_RU'])
                     if ch.char is not None:
                         if ch.char == '..':

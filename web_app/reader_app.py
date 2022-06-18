@@ -167,7 +167,7 @@ def results(template):
         image_paths_and_texts.append(("/" + app.config['DATA_ROOT'] + "/" + marked_image_path, out_text, out_braille,))
 
         # list with full paths to send to mail form
-        file_names.append((str(data_root_path / marked_image_path), str(data_root_path / recognized_text_path)))  # список для
+        file_names.append((str(data_root_path / marked_image_path), str(data_root_path / recognized_text_path)))  # list for
 
     form = ResultsForm(results_list=json.dumps(file_names))
     return render_template(template, form=form, image_paths_and_texts=image_paths_and_texts)

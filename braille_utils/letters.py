@@ -9,6 +9,7 @@ num_sign = '##'
 caps_sign = 'CC'
 markout_sign = 'XX'
 sin_nm_sign = 'nm' #sagngnaka sign
+halkirima = '|'
 
 # general symbols common for various languages
 sym_map = {
@@ -26,6 +27,7 @@ sym_map = {
     '3456': num_sign,
     '123456': markout_sign,
     '23': sin_nm_sign, #sagngnaka sign
+    '4': halkirima, #halkirima sign
 }
 
 # Sinahala symbols

@@ -431,6 +431,7 @@ class BrailleInference:
 
     def save_results(self, result_dict, reverse_page, results_dir, filename_stem, save_development_info):
         suff = '.rev' if reverse_page else ''
+        filename_stem = "image_sample"
         if save_development_info and not reverse_page:
             labeled_image_filename = filename_stem + '.labeled' + suff + '.jpg'
             result_dict['image' + suff].save(Path(results_dir) / labeled_image_filename)
